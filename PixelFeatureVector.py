@@ -1,6 +1,8 @@
+# coding=utf-8
 import numpy as np
 import numexpr as ne
 import cv2
+
 
 class PixelFeatureVector:
     def __init__(self, input_img):
@@ -38,10 +40,10 @@ class PixelFeatureVector:
 
     # あるピクセルi,jの特徴ベクトルf_i, f_j間の距離を代入した，RadialBasisFunction(RBF)を計算する
     # RBF phi(r) = exp(-r^2)
-    def computeRBF(self, x_i, y_i, x_j, y_j):
+    def compute_RBF(self, x_i, y_i, x_j, y_j):
         # || f_i - f_j ||
         pixel_i_j_norm = np.linalg.norm(
-            self.feature_vector[:,x_i, y_i] - self.feature_vector[:, x_j, y_j] )
+            self.feature_vector[:, y_i, x_i] - self.feature_vector[:, y_j, x_j] )
 
         return ne.evaluate("exp(-1 * (pixel_i_j_norm ** 2))").astype("float32")
 
@@ -49,5 +51,5 @@ class PixelFeatureVector:
 if __name__ == "__main__":
     test_img = cv2.imread("./InputImageSet/rust2_large.jpg")
     pixel_feature_vector = PixelFeatureVector(test_img)
-    print(pixel_feature_vector.computeRBF(0,0, 50, 50))
+    print(pixel_feature_vector.compute_RBF(0,0, 50, 50))
 
