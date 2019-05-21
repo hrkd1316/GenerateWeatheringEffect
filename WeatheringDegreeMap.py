@@ -65,13 +65,13 @@ class WeatheringDegreeMap:
         self.weathering_degree_map = self.weathering_degree_map / np.max(self.weathering_degree_map)
         return self.weathering_degree_map
 
-    # GrabCutを使って経年変化度マップを風化/非風化の二値に分割する
-    def binarize_weathering_degree_map(self):
-        print("binarize_start")
+    # 経年変化度マップの全ピクセルを風化/非風化の二値にラベリングする
+    def labeling_weathering_degree_map(self):
+        print("labeling_start")
 
-        binarize_map = gc.graph_cut(self.weathering_degree_map, self.most_weathered_pixel, self.least_weathered_pixel)
+        labeled_map = gc.graph_cut(self.weathering_degree_map, self.most_weathered_pixel, self.least_weathered_pixel)
 
-        return binarize_map
+        return labeled_map
 
 
 if __name__ == "__main__":
