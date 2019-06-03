@@ -4,9 +4,9 @@ import numpy as np
 import scipy.optimize as sp
 import time
 
-from PixelFeatureVector import PixelFeatureVector
+from pixel_feature import PixelFeatureVector
 import extract_foreground_area as extract
-import GraphCut as gc
+from graph_cut import graph_cut 
 
 
 # 経年変化度合い [0.0, 1.0]
@@ -69,7 +69,7 @@ class WeatheringDegreeMap:
     def labeling_weathering_degree_map(self):
         print("labeling_start")
 
-        labeled_map = gc.graph_cut(self.weathering_degree_map, self.most_weathered_pixel, self.least_weathered_pixel)
+        labeled_map = graph_cut(self.weathering_degree_map, self.most_weathered_pixel, self.least_weathered_pixel)
 
         return labeled_map
 

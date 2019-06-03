@@ -11,18 +11,14 @@ def generate_weathering_degree(input_img, through_pixel):
                    (255, 255, 255), -1)
      for pixel in through_pixel]
 
-    # 元の画像で画素値0の部分を除いておく
-    passage_route_on_obj_img = np.where(gray_input_img == 0, 0, passage_route_img)
-
-    print(passage_route_on_obj_img.shape)
-    cv2.imshow("route_img", passage_route_on_obj_img)
-
     ADJUSTMENT_PARAM = 1.5
-    # distanceTransform(src, distanceType, maskSize(1 or 3 or 5))
-    # 各ピクセルが最も近い画素値0までの距離マップ(ndarray)が返される
-    dist_map = cv2.distanceTransform(passage_route_on_obj_img, cv2.DIST_L2, 5)
+    dist_map = cv2.distanceTransform(passage_route_img, cv2.DIST_L2, 5)
+    #dist_map = cv2.distanceTransform(passage_route_on_obj_img, cv2.DIST_L2, 5)
     # 中心1点じゃなくて中心らへんの領域を最大値にしたいので全体的に底上げ
     dist_map = dist_map / np.amax(dist_map)  * ADJUSTMENT_PARAM
     dist_map[dist_map > 1.0] = 1.0
+    # 元の画像で画素値0の部分を除いておく
+    passage_route_on_obj_img = np.where(gray_input_img == 0, 0, passage_route_img)
+    dist_map_on_obj_img = np.where(gray_input_img == 0, 0, dist_map)
+    return passage_route_on_obj_img, dist_map_on_obj_img.astype(np.float16)
 
-    cv2.imshow("dist_map", dist_map)

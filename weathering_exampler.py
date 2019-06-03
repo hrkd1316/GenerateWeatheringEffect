@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import math
 
-from PatchMatch import NNF
+from patch_match import NNF
 
 class WeatheringExampler:
     def __init__(self, input_img, labeled_img, EXAMPLER_SIZE):
@@ -13,7 +13,7 @@ class WeatheringExampler:
     def create_weathering_exampler(self):
         most_weathered_rect, only_weathered_rect = self.find_rectangle_with_sat()
         cv2.imshow("only_weathered_rect", only_weathered_rect)
-        weathering_exampler = self.fill_hole(most_weathered_rect, only_weathered_rect)
+        weathering_exampler = self.fill_hole(only_weathered_rect, most_weathered_rect)
 
         return most_weathered_rect, only_weathered_rect, weathering_exampler
     
@@ -47,5 +47,5 @@ class WeatheringExampler:
     # tgt_img: 穴が開いた画像  (only_weathered_rect)
     def fill_hole(self, ref_img, tgt_img):
         print("fill_hole_start")
-        NNF_ = NNF(ref_img, tgt_img, 8)
+        NNF_ = NNF(ref_img, tgt_img, 6)
         return NNF_.reconstruct_img()
