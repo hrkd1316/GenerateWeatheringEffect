@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from numba import jit
 
 # NNF: Nearest Neighbor Field(最近傍フィールド)
 class NNF:
@@ -35,6 +36,7 @@ class NNF:
                        - self.tgt_img[tgt_y-rect_top:tgt_y+rect_bottom, tgt_x-rect_left:tgt_x+rect_right])**2) \
                / (rect_left + rect_right) / (rect_top + rect_bottom)
 
+    @jit
     def improve_nnf(self, total_iter = 3):
         [[[self.find_best_match(y, x) for x in range(self.tgt_img.shape[1])]
                                       for y in range(self.tgt_img.shape[0])]
@@ -51,8 +53,8 @@ class NNF:
     # todo: 何かもうちょっと効率的にできないものか
     # (y,x)からshift_pixelだけずらした点でのnnfを見る
     # (y,x)+shift_pixelの評価値を見て新たな点の方がよければ(y,x)のnnfを変更する
+    @jit
     def propagation(self, y, x, best_y, best_x, best_dist):
-
         for i in reversed((range(4))):
             shift_pixel = 2 ** i
             if y - shift_pixel >= 0:
@@ -85,31 +87,25 @@ class NNF:
 
         return best_y, best_x, best_dist
 
+    @jit
     def random_search(self, y, x, best_y, best_x, best_dist):
         rand_shift = min(self.src_img.shape[0]//2, self.src_img.shape[1]//2)
-        while rand_shift > 0:
-            try:
-                min_y = max(best_y - rand_shift, 0)
-                max_y = min(best_y + rand_shift, self.src_img.shape[0])
-                min_x = max(best_x - rand_shift, 0)
-                max_x = min(best_x + rand_shift, self.src_img.shape[1])
-                candidate_y = np.random.randint(min_y, max_y)
-                candidate_x = np.random.randint(min_x, max_x)
-                candidate_dist = self.calc_dist(y, x, candidate_y, candidate_x)
-                if candidate_dist < best_dist:
-                    best_y, best_x, best_dist = candidate_y, candidate_x, candidate_x
 
-            except:
-                print("=============Exception===============")
-                print("y, x=", y, x)
-                print("rand_d",rand_shift)
-                print("miny, maxy", min_y, max_y)
-                print("minx, maxx", min_x, max_x)
-                print("besty, bestx", best_y, best_x)
-                print("bestd", best_dist)
+        # whileは遅いから何となく使いたくない
+        for i in range(rand_shift):
+            if rand_shift < 1:
+                break
+            min_y = max(best_y - rand_shift, 0)
+            max_y = min(best_y + rand_shift, self.src_img.shape[0])
+            min_x = max(best_x - rand_shift, 0)
+            max_x = min(best_x + rand_shift, self.src_img.shape[1])
+            candidate_y = np.random.randint(min_y, max_y)
+            candidate_x = np.random.randint(min_x, max_x)
+            candidate_dist = self.calc_dist(y, x, candidate_y, candidate_x)
+            if candidate_dist < best_dist:
+                best_y, best_x, best_dist = candidate_y, candidate_x, candidate_x
 
             rand_shift = rand_shift // 2
-
         return best_y, best_x, best_dist
 
     def reconstruct_img(self):
